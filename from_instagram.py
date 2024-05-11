@@ -86,7 +86,7 @@ def extract_media_path(media_path):
         print("The input string does not contain 'media/stories'")
 
 
-def create_story_point(stories_info, input_path, google_data_path):
+def create_story_point(stories_info, input_path, google_data_path, buffer_hours=0):
     """
     Parameters: 
         - `stories_info` (list): a list of extracted exif data from the Instagram stories
@@ -120,24 +120,22 @@ def create_story_point(stories_info, input_path, google_data_path):
             )
             points.append(point_and_properties)
         else:
-            result = find_matching_place_visit_coordinates(story_info, google_data_path)
+            result = find_matching_place_visit_coordinates(story_info, google_data_path, buffer_hours)
             if result == False:
                 pass
             else:
                 if story_info["url"].lower().endswith("jpg"):
                     properties["has_image"] = True
-                    print(result)
-                    
                     properties["longitude"] = result[1]/ 10e6
                     properties["latitude"] = result[0]/ 10e6
-                    properties["url"] = story_info["url"]
-                    properties["<img>_tooltip"] = story_info["url"]
-                    # point_and_properties = (Point((story_info["longitude"], story_info["latitude"])), properties)
+                    url = "http://localhost:3000/" + extract_participant_name(input_path) + "/" + story_info["url"].split("/")[-1]
+                    properties["url"] = url
+                    properties["<img>_tooltip"] = url
                     point_and_properties = (Point((properties["longitude"], properties["latitude"])), properties)
                     points.append(point_and_properties)
     return points
 
-def find_matching_place_visit_coordinates(story_info, path):
+def find_matching_place_visit_coordinates(story_info, path, buffer_hours):
     timestamp_str = story_info.get('datetime_original') or story_info.get('datetime_story')
     if not timestamp_str:
         print("Error: No valid timestamp found.")
@@ -157,14 +155,15 @@ def find_matching_place_visit_coordinates(story_info, path):
             return None
 
     # Check if the timestamp is within the durations in a place_visit_json
-    def check_timestamp_in_place_visit(creation_time, timeline_objects):
+    def check_timestamp_in_place_visit(creation_time, timeline_objects, buffer_hours):
+        buffer_delta = datetime.timedelta(hours=buffer_hours)
         if 'timelineObjects' not in timeline_objects:
             print("no timelineObjects")
         for timeline_object in timeline_objects.get('timelineObjects', []):
             if "placeVisit" in timeline_object:
                 duration = timeline_object['placeVisit']['duration']
-                start_timestamp = datetime.datetime.fromisoformat(duration['startTimestamp'].rstrip('Z'))
-                end_timestamp = datetime.datetime.fromisoformat(duration['endTimestamp'].rstrip('Z'))
+                start_timestamp = datetime.datetime.fromisoformat(duration['startTimestamp'].rstrip('Z')) - buffer_delta
+                end_timestamp = datetime.datetime.fromisoformat(duration['endTimestamp'].rstrip('Z')) + buffer_delta
                 if start_timestamp <= creation_time <= end_timestamp:
                     location = timeline_object['placeVisit']['location']
                     return (location['latitudeE7'], location['longitudeE7'])
@@ -172,8 +171,8 @@ def find_matching_place_visit_coordinates(story_info, path):
                 activity = timeline_object["activitySegment"]
                 if "duration" in activity:
                     duration = activity['duration']
-                    start_timestamp = datetime.datetime.fromisoformat(duration['startTimestamp'].rstrip('Z'))
-                    end_timestamp = datetime.datetime.fromisoformat(duration['endTimestamp'].rstrip('Z'))
+                    start_timestamp = datetime.datetime.fromisoformat(duration['startTimestamp'].rstrip('Z')) - buffer_delta
+                    end_timestamp = datetime.datetime.fromisoformat(duration['endTimestamp'].rstrip('Z')) + buffer_delta
                     if start_timestamp <= creation_time <= end_timestamp:
                         location = activity["startLocation"]
                         return (location['latitudeE7'], location['longitudeE7'])
@@ -185,7 +184,7 @@ def find_matching_place_visit_coordinates(story_info, path):
             if file.endswith('.json'):
                 with open(os.path.join(root, file), 'r') as f:
                     place_visit_json = json.load(f)
-                    result = check_timestamp_in_place_visit(creation_time, place_visit_json)
+                    result = check_timestamp_in_place_visit(creation_time, place_visit_json, buffer_hours)
                     if result:
                         return result
     

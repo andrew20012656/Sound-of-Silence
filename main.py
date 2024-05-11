@@ -24,6 +24,18 @@ def get_filter_filename():
             print("Please enter the filename")
         else:
             return filename
+
+def get_buffer_hours():
+    while True:
+        buffer_hours = input("Enter the number of buffer hours: ")
+        try:
+            buffer_hours = int(buffer_hours)
+            if buffer_hours >= 0:
+                return buffer_hours
+            else:
+                print("Please enter a non-negative integer.")
+        except ValueError:
+            print("Invalid input. Please enter an integer value.")
         
 def main():
     input_dir = sys.argv[1]
@@ -35,6 +47,8 @@ def main():
     if filter_enabled:
         filter_keywords = get_filter_keywords()
         filtered_filename = get_filter_filename()
+    
+    buffer_hours = get_buffer_hours()
 
     os.makedirs(output_dir, exist_ok=True)
 
@@ -45,11 +59,9 @@ def main():
     if ins_stories_file_path is not None:
         path_to_stories_data = ins_stories_file_path
         stories_info = extract_stories_with_exif_data(path_to_stories_data)
-        points = create_story_point(stories_info, ins_stories_file_path, input_dir)
+        points = create_story_point(stories_info, ins_stories_file_path, input_dir, buffer_hours)
         for point in points:
             places_visited.append(point)
-            # Process images based on those points
-            # point["relative_url"].split("/")[-1]
 
     subfolders = [f for f in os.listdir(anonymized_data_dir) if os.path.isdir(os.path.join(anonymized_data_dir, f))]
     for subfolder in subfolders:
