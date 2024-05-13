@@ -40,7 +40,7 @@ def extract_stories_with_exif_data(path_to_stories_data):
     Returns:
         - stories_info (list): a list of dict each of which contains the exif data of stories
     """
-    with open(path_to_stories_data, "r") as json_file:
+    with open(path_to_stories_data, "r", encoding='utf-8') as json_file:
         try:
             stories_data = json.load(json_file)
         except json.JSONDecodeError:
@@ -182,7 +182,7 @@ def find_matching_place_visit_coordinates(story_info, path, buffer_hours):
     for root, dirs, files in os.walk(path):
         for file in files:
             if file.endswith('.json'):
-                with open(os.path.join(root, file), 'r') as f:
+                with open(os.path.join(root, file), 'r', encoding='utf-8') as f:
                     place_visit_json = json.load(f)
                     result = check_timestamp_in_place_visit(creation_time, place_visit_json, buffer_hours)
                     if result:

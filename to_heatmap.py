@@ -92,7 +92,7 @@ if __name__ == "__main__":
         for filename in os.listdir(subfolder_path):
             if filename.endswith('.json'):
                 file_path = os.path.join(subfolder_path, filename)
-                with open(file_path, 'r') as json_file:
+                with open(file_path, 'r', encoding='utf-8') as json_file:
                     try:
                         maps_json = json.load(json_file)
                     except json.JSONDecodeError:
