@@ -2,6 +2,7 @@ import sys
 import os
 import json
 import re
+import chardet
 from pprint import pprint
 from common_utils import *
 
@@ -25,7 +26,8 @@ class DataValidator:
             for filename in os.listdir(subfolder_path):
                 if filename.endswith('.json'):
                     file_path = os.path.join(subfolder_path, filename)
-                    with open(file_path, 'r') as json_file:
+                    enc = chardet.detect(open(file_path,'rb').read())['encoding']
+                    with open(file_path, 'r', encoding=enc) as json_file:
                         try:
                             maps_json = json.load(json_file)
                             if not maps_json:
