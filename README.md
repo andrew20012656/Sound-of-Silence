@@ -3,15 +3,18 @@
 ## Table of Contents
 1. [Installation](#installation)
 2. [Project Structure](#project-structure)
-3. [Usage](#usage)
+3. [Setup API Key](#setup-api-key)
+4. [Usage](#usage)
     1. [Data Processing Procedure](#data-processing-procedure)
     2. [Running applications](#running-applications)
-4. [Contributing](#contributing)
-5. [License](#license)
+        1. [Running LocalServer for Static Files](#running-localserver-for-static-files)
+        2. [Running Kepler.gl](#running-keplergl)
+5. [Usage of Kepler.gl](#usage-of-keplergl)
+
 
 
 ## Installation
-Make sure you have Python and Node.js installed. To download Node.js, please visit [Node.js](https://nodejs.org/en/download) official website.
+Make sure you have Python and Node.js installed. To download Node.js, please visit [Node.js](https://nodejs.org/en/download) official website. In the Terminal, please follow the instructions:
 
 1. Create a virtual environment
     ```bash
@@ -33,16 +36,19 @@ Make sure you have Python and Node.js installed. To download Node.js, please vis
     npm install serve
     ```
 
+## Setup API Key
+
+In `config.py` file, enter your API Key for [Novita.ai](https://novita.ai/) and [AILab](https://www.ailabtools.com/)
+```python
+TEXT_REMOVAL_API_KEY="YOUR API KEY FOR NOVITA.AI"
+BLUR_FACE_API_KEY= "YOUR API KEY FOR AILAB"
+```
+
 ## Project Structure
 
 The project follows the following directory structure:
 ```bash
-┌-─ assets
-│   ├── css
-│   │   ├── **/*.css
-│   ├── favicon.ico
-│   ├── images
-├── data
+┌-─ data
 │   ├── participant1
 │   │   ├── google-takeout
 │   │   │   ├── Semantic-Location-History
@@ -59,12 +65,7 @@ The project follows the following directory structure:
 └── ...
 ```
 
-## Setup API Key
-In `config.py` file, enter your API Key for [Novita.ai](https://novita.ai/) and [AILab](https://www.ailabtools.com/)
-```python
-TEXT_REMOVAL_API_KEY=
-BLUR_FACE_API_KEY= 
-```
+
 
 ## Validation 
 
@@ -104,6 +105,8 @@ If you are interested, you can find the anonymized data saved under `./data/outp
 
 ## Running applications
 
+### Running LocalServer for Static Files
+
 The project structure is expected as following (it doesn't have to be):
 ```bash
 ┌-─ ...
@@ -129,13 +132,32 @@ The project structure is expected as following (it doesn't have to be):
         npx serve
         ```
 
-## Running Kepler.gl
-    1. 
-    ```bash
-    yarn
-    ```
+### Running Kepler.gl
+1. please clone the repository from https://github.com/andrew20012656/Kepler-Interface
 
-    2. 
-    ```bash
-    yarn start
-    ```
+2. 
+```node.js
+npm install -g yarn
+```
+
+3. 
+```bash
+yarn
+```
+
+4. 
+```bash
+yarn start
+```
+
+## Usage of Kepler.gl
+1. To filter out the points with images:
+    1. Click on <img src="./assets/filter-icon.png" width="25" height="25">
+    2. Click on "Add Filter"
+    3. Set "has_image" to true
+
+2. To visualize the frequency of visiting a place:
+    1. Create a layer of type "Grid"
+    2. Customize "Radius"
+    3. Turn on "Height" and adjust the "Height" slider
+    4. On the right side of the window, enable "3D Map"
