@@ -85,6 +85,8 @@ If you are interested, you can find the anonymized data saved under `./data/outp
     ```bash
     python main.py <path-to-Semantic-Location-History-folder> <path-to-output-folder> <path-to-stories.json-file>
     ```
+    - `<path-to-Semantic-Location-History-folder>` - the folder named "Semantic Location History"
+    - `<path-to-stories.json-file>` - the stories.json file containing all metadata either under "content" or "your_instagram_activity" folder
     - The following questions will be prompted in Terminal:
         1. Fiter Locations?
             - Enter `true` if you want to filter locations on specific keywords; `false` otherwise
@@ -102,6 +104,7 @@ If you are interested, you can find the anonymized data saved under `./data/outp
         ```bash
         python anonymize_image.py ./data/Instagram/media/stories ./data/output
         ```
+    - path-to-Instagram-images-folder - the folder containing stories images
 
 ## Running applications
 
