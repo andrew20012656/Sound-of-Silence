@@ -17,7 +17,6 @@ def save_image_from_url(url, save_path):
         if response.status_code == 200:
             with open(save_path, 'wb') as f:
                 f.write(response.content)
-            # print("Image saved successfully.")
         else:
             print("Failed to download image: HTTP status code",
                   response.status_code)
@@ -26,9 +25,7 @@ def save_image_from_url(url, save_path):
 
 def copy_image(source_path, destination_path):
     try:
-        # Copy the file from source_path to destination_path
         shutil.copyfile(source_path, destination_path)
-        # print("Image copied successfully.")
     except Exception as e:
         print("An error occurred:", e)
 
@@ -40,8 +37,6 @@ def make_blur_request(image_path, filename):
         ('image', (filename, open(image_path, 'rb'), 'application/octet-stream'))
     ]
     response = requests.request("POST", url, headers=headers, data=payload, files=files)
-    # print(response.text)
-    # print(response.content)
     response_json = json.loads(response.text)
     if response_json["error_detail"]["status_code"] == 200:
         return response_json['data']['image_url']
@@ -67,10 +62,6 @@ def remove_text(input_dir, output_dir):
                 with open(img_path, "rb") as image_file:
                     img = Image.open(image_file)
                     img.thumbnail((1024, 1024))
-                    # to be modified
-                    # output_folder = os.path.join(output_dir, subfolder)
-                    # os.makedirs(output_folder, exist_ok=True)
-                    # output_dir_path = os.path.join(output_folder, filename)
                     output_dir_path = os.path.join(output_dir, filename)
                     img.save(output_dir_path)
 
