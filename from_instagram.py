@@ -141,7 +141,6 @@ def find_matching_place_visit_coordinates(story_info, path, buffer_hours):
         print("Error: No valid timestamp found.")
         return None
 
-    # Convert string timestamp to datetime object
     creation_time = None
     if timestamp_str.isdigit():
         creation_time = datetime.datetime.fromtimestamp(int(timestamp_str))
@@ -154,19 +153,26 @@ def find_matching_place_visit_coordinates(story_info, path, buffer_hours):
             print("Error: Timestamp format is not recognized.")
             return None
 
-    # Check if the timestamp is within the durations in a place_visit_json
     def check_timestamp_in_place_visit(creation_time, timeline_objects, buffer_hours):
         buffer_delta = datetime.timedelta(hours=buffer_hours)
+        closest_location = None
+        closest_time_difference = datetime.timedelta.max
+
         if 'timelineObjects' not in timeline_objects:
             print("no timelineObjects")
+
         for timeline_object in timeline_objects.get('timelineObjects', []):
             if "placeVisit" in timeline_object:
                 duration = timeline_object['placeVisit']['duration']
                 start_timestamp = datetime.datetime.fromisoformat(duration['startTimestamp'].rstrip('Z')) - buffer_delta
                 end_timestamp = datetime.datetime.fromisoformat(duration['endTimestamp'].rstrip('Z')) + buffer_delta
                 if start_timestamp <= creation_time <= end_timestamp:
-                    location = timeline_object['placeVisit']['location']
-                    return (location['latitudeE7'], location['longitudeE7'])
+                    time_difference = min(abs(creation_time - start_timestamp), abs(creation_time - end_timestamp))
+                    if time_difference < closest_time_difference:
+                        closest_time_difference = time_difference
+                        location = timeline_object['placeVisit']['location']
+                        closest_location = (location['latitudeE7'], location['longitudeE7'])
+
             if "activitySegment" in timeline_object:
                 activity = timeline_object["activitySegment"]
                 if "duration" in activity:
@@ -174,9 +180,17 @@ def find_matching_place_visit_coordinates(story_info, path, buffer_hours):
                     start_timestamp = datetime.datetime.fromisoformat(duration['startTimestamp'].rstrip('Z')) - buffer_delta
                     end_timestamp = datetime.datetime.fromisoformat(duration['endTimestamp'].rstrip('Z')) + buffer_delta
                     if start_timestamp <= creation_time <= end_timestamp:
-                        location = activity["startLocation"]
-                        return (location['latitudeE7'], location['longitudeE7'])
-        return None
+                        time_difference = min(abs(creation_time - start_timestamp), abs(creation_time - end_timestamp))
+                        if time_difference < closest_time_difference:
+                            closest_time_difference = time_difference
+                            location = activity["startLocation"]
+                            closest_location = (location['latitudeE7'], location['longitudeE7'])
+
+        if closest_location is not None:
+            print("Found a matching location with time difference: " + str(closest_time_difference))
+
+        return closest_location
+
     
     # Traverse the directory structure
     for root, dirs, files in os.walk(path):
